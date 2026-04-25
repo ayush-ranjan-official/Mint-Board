@@ -1,7 +1,7 @@
 {
   "project_name": "MintBoard",
-  "repo_url": "https://github.com/AyushRanjan15/MintBoard",
-  "commit_sha": "PLACEHOLDER",
+  "repo_url": "https://github.com/ayush-ranjan-official/Mint-Board/",
+  "commit_sha": "2f6b177e5a20af1afccd22e09bdd70a1e668f1e4",
   "rollup_chain_id": "mintboard-1",
   "deployed_address": "0x5e268621B61E10f1296A5C53A10ec05D0Cd3cAb8",
   "vm": "evm",
