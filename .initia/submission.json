@@ -3,7 +3,7 @@
   "repo_url": "https://github.com/AyushRanjan15/MintBoard",
   "commit_sha": "PLACEHOLDER",
   "rollup_chain_id": "mintboard-1",
-  "deployed_address": "0x186E8B94583D5f5b44fa0a2C2e7D7D7ff170D71F",
+  "deployed_address": "0x5e268621B61E10f1296A5C53A10ec05D0Cd3cAb8",
   "vm": "evm",
   "native_feature": "auto-signing",
   "core_logic_path": "contracts/src/MicroPayment.sol",

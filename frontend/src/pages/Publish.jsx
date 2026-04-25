@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useInterwovenKit } from '@initia/interwovenkit-react'
 import { analyzeContent, storeArticle } from '../lib/ai'
-import { encodePublish, computeContentHash, parseMIN } from '../lib/evm'
+import { encodePublish, computeContentHash, parseMIN, getNextArticleId } from '../lib/evm'
 import { CONTRACTS, ROLLUP_CHAIN_ID } from '../config/chains'
 import UsernameDisplay from '../components/UsernameDisplay'
 
@@ -44,9 +44,14 @@ export default function Publish() {
         metadata = await analyzeContent(title, content)
       }
 
-      // Step 2: Store content in AI service
+      // Step 2: Get the next on-chain article ID so AI service ID matches
+      const nextId = await getNextArticleId()
+      const onChainId = Number(nextId)
+
+      // Step 3: Store content in AI service with the same ID as on-chain
       setStep('Storing content...')
-      const stored = await storeArticle({
+      await storeArticle({
+        article_id: onChainId,
         title,
         content,
         summary: metadata.summary || '',
@@ -56,11 +61,10 @@ export default function Publish() {
         seo_description: metadata.seoDescription || '',
       })
 
-      // Step 3: Compute content hash
+      // Step 4: Compute content hash
       const contentHash = computeContentHash(content)
       const priceWei = parseMIN(price || '0')
 
-      // Build metadata JSON for on-chain storage
       const metadataJSON = JSON.stringify({
         title,
         summary: metadata.summary || '',
@@ -69,7 +73,7 @@ export default function Publish() {
         tags: metadata.tags || [],
       })
 
-      const contentCID = String(stored.article_id)
+      const contentCID = String(onChainId)
 
       // Step 4: Publish on-chain
       setStep('Publishing on-chain...')

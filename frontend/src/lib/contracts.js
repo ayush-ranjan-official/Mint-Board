@@ -164,6 +164,13 @@ export const MICRO_PAYMENT_ABI = [
     type: 'function',
   },
   {
+    inputs: [{ name: 'articleId', type: 'uint256' }],
+    name: 'getDynamicPrice',
+    outputs: [{ type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [{ name: '', type: 'uint256' }],
     name: 'curatorRewardPool',
     outputs: [{ type: 'uint256' }],

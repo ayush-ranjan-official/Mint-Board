@@ -33,10 +33,11 @@ export async function listArticles() {
 }
 
 export async function getRecommendations(readerAddress, readIds = [], limit = 5) {
+  const ids = Array.isArray(readIds) ? readIds : []
   const params = new URLSearchParams({
     reader_address: readerAddress || '',
     limit: String(limit),
-    read_ids: readIds.join(','),
+    read_ids: ids.join(','),
   })
   const res = await fetch(`${AI_SERVICE_URL}/recommend?${params}`)
   if (!res.ok) return { recommended_article_ids: [], reasoning: '' }

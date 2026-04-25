@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown'
 import { useInterwovenKit } from '@initia/interwovenkit-react'
 import { formatUnits } from 'viem'
 import { getArticleContent } from '../lib/ai'
-import { hasAccess, getQualityScore, getArticle, encodePayForRead, computeContentHash, formatMIN } from '../lib/evm'
+import { hasAccess, getQualityScore, getArticle, verifyContent, encodePayForRead, computeContentHash, formatMIN } from '../lib/evm'
 import { CONTRACTS, ROLLUP_CHAIN_ID } from '../config/chains'
 import QualityBadge from '../components/QualityBadge'
 import VerifiedBadge from '../components/VerifiedBadge'
@@ -28,13 +28,27 @@ export default function ArticlePage() {
 
   const loadArticle = useCallback(async () => {
     try {
-      const [data, chainData] = await Promise.all([
-        getArticleContent(articleId),
-        getArticle(articleId),
-      ])
-      if (data) setArticle(data)
+      // First fetch on-chain data to get the contentCID (AI service article ID)
+      const chainData = await getArticle(articleId)
       if (chainData && chainData.author !== '0x0000000000000000000000000000000000000000') {
         setOnChainArticle(chainData)
+      }
+
+      // Use contentCID from on-chain data to fetch from AI service, fallback to articleId
+      const aiId = chainData?.contentCID ? Number(chainData.contentCID) || articleId : articleId
+      const data = await getArticleContent(aiId)
+
+      if (data) {
+        setArticle(data)
+        // Verify content hash against on-chain hash
+        if (data.content && chainData && chainData.contentHash &&
+            chainData.contentHash !== '0x0000000000000000000000000000000000000000000000000000000000000000') {
+          try {
+            const hash = computeContentHash(data.content)
+            const isValid = await verifyContent(articleId, hash)
+            setVerified(isValid)
+          } catch {}
+        }
       }
     } catch (e) {
       console.error('Failed to load article:', e)
@@ -164,10 +178,7 @@ export default function ArticlePage() {
         <AutoSignBanner />
 
         {isInactive && (
-          <div style={{
-            background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 'var(--radius-sm)',
-            padding: '0.75rem 1rem', marginBottom: '1rem', color: '#991b1b', fontSize: '0.875rem',
-          }}>
+          <div className="alert alert-danger">
             This article has been deactivated by the author and is no longer available for reading.
           </div>
         )}
@@ -181,16 +192,8 @@ export default function ArticlePage() {
         </div>
 
         {article.summary && (
-          <div style={{
-            background: 'var(--accent-bg)',
-            border: '1px solid var(--accent-border)',
-            borderRadius: 'var(--radius-sm)',
-            padding: '1rem',
-            marginBottom: '2rem',
-            fontSize: '0.9375rem',
-            color: 'var(--fg-muted)',
-          }}>
-            <strong style={{ color: 'var(--accent)' }}>Summary:</strong> {article.summary}
+          <div className="article-summary">
+            <strong>Summary:</strong> {article.summary}
           </div>
         )}
 
@@ -200,14 +203,12 @@ export default function ArticlePage() {
           </div>
         ) : (
           <div>
-            <div className="article-content" style={{ maxHeight: '200px', overflow: 'hidden', position: 'relative' }}>
+            <div className="article-content" style={{ maxHeight: '220px', overflow: 'hidden' }}>
               <ReactMarkdown>{article.content.slice(0, 500) + '...'}</ReactMarkdown>
             </div>
             <div className="paywall">
               <h3>Continue reading</h3>
-              <p style={{ color: 'var(--fg-muted)', marginBottom: '1rem' }}>
-                {paying ? 'Processing payment...' : `Pay ${formatMIN(article.pricePerRead || 0)} MIN to unlock this article`}
-              </p>
+              <p>{paying ? 'Processing payment...' : `Pay ${formatMIN(article.pricePerRead || 0)} MIN to unlock this article`}</p>
               <button className="btn btn-primary btn-lg" onClick={handlePay} disabled={paying}>
                 {paying ? 'Unlocking...' : 'Unlock Article'}
               </button>

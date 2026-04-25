@@ -22,7 +22,7 @@ export default function AutoSignBanner() {
   return (
     <div className="autosign-banner">
       <div className="autosign-banner-text">
-        <strong>Enable auto-pay</strong> — Approve once, then read articles seamlessly without wallet popups.
+        <strong>Enable auto-pay:</strong> Approve once, then read articles seamlessly without wallet popups.
       </div>
       <button className="btn btn-primary btn-sm" onClick={handleEnable}>
         Enable Auto-Pay
