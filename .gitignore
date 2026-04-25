@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+
+# Foundry libs & build artifacts
+contracts/lib/
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+ai-service/mintboard.db
+ai-service/.venv/
+venv/
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+*.bin
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Temp
+*.tmp
+*.log
+nohup.out
+
+# Private / not for repo
+dev.md
+CLAUDE.md
+MintBoard_Demo_Transcript.md
+MintBoard_Pitch_Deck.pptx
+.agents/
+skills-lock.json
+
+# Claude
+.claude/
